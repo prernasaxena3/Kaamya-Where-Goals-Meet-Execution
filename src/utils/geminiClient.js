@@ -3,7 +3,6 @@ import { generateAISuggestions } from "./aiSuggestions";
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
-console.log("API_KEY from Vite env:", API_KEY);
 
 // Function to list available models (using direct fetch)
 async function listAvailableModels() {
@@ -16,16 +15,6 @@ async function listAvailableModels() {
         `HTTP error! status: ${response.status}, message: ${errorData.error.message}`
       );
     }
-    const data = await response.json();
-    console.log("Available Gemini Models (via direct fetch):");
-    data.models.forEach((model) => {
-      console.log(`- Name: ${model.name}`);
-      console.log(`  Display Name: ${model.displayName}`);
-      console.log(
-        `  Supported Methods: ${model.supportedGenerationMethods?.join(", ")}`
-      );
-      console.log("---");
-    });
   } catch (error) {
     console.error("Error listing models via direct fetch:", error);
   }
