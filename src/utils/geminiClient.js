@@ -1,41 +1,22 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateAISuggestions } from "./aiSuggestions";
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
-
-// Function to list available models (using direct fetch)
-async function listAvailableModels() {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `HTTP error! status: ${response.status}, message: ${errorData.error.message}`
-      );
-    }
-  } catch (error) {
-    console.error("Error listing models via direct fetch:", error);
-  }
-}
-
-listAvailableModels();
+// Hitting your deployed Vercel backend
+const BACKEND_URL = "https://kaamya-backend.vercel.app/api/gemini";
 
 export async function getGeminiResponse(prompt, todos = []) {
   try {
-    // We already know from prior debugging that 'gemini-pro' might not be directly available
-    // and 'gemini-1.0-pro' is a safer bet for general text generation.
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    const result = await model.generateContent({
-      contents: [{ parts: [{ text: prompt }] }],
+    const response = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
     });
 
-    const response = await result.response;
-    const text = response.text();
+    const data = await response.json();
 
-    const extractedSuggestions = extractSuggestions(text);
+    // Fallback in case backend doesn't extract suggestions
+    const extractedSuggestions = extractSuggestions(data.content);
     const fallbackSuggestions = generateAISuggestions(todos);
 
     const finalSuggestions =
@@ -44,18 +25,19 @@ export async function getGeminiResponse(prompt, todos = []) {
         : fallbackSuggestions.map((s) => s.title);
 
     return {
-      content: text,
+      content: data.content,
       suggestions: finalSuggestions,
     };
   } catch (error) {
-    console.error("Gemini API error:", error);
+    console.error("Error calling Gemini backend:", error);
     return {
-      content: "Sorry, something went wrong while talking to the assistant.",
+      content: "Something went wrong calling the assistant.",
       suggestions: generateAISuggestions(todos).map((s) => s.title),
     };
   }
 }
 
+// Optional: Keep the extraction logic on the frontend
 function extractSuggestions(text) {
   const lines = text.split("\n");
   return lines
