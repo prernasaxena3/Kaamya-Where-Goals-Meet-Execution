@@ -89,10 +89,10 @@ function App() {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                    AI Productivity Suite
+                    Kaamya - Where Goals Meet Execution
                   </h1>
                   <p className="text-sm text-gray-600">
-                    Smart planning • Focused work • Better results
+                    Smart goals • Focused action • Kaamya results
                   </p>
                 </div>
               </div>
