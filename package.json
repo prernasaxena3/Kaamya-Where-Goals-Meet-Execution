@@ -12,12 +12,17 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/interaction": "^6.1.19",
+    "@fullcalendar/react": "^6.1.19",
+    "@fullcalendar/timegrid": "^6.1.19",
     "@schedule-x/calendar": "^2.36.0",
     "@schedule-x/react": "^2.36.0",
     "@schedule-x/theme-default": "^2.36.0",
     "dotenv": "^17.2.0",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
+    "react-datepicker": "^8.7.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.7.1"
   },

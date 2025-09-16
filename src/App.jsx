@@ -1,6 +1,14 @@
 // src/App.jsx
 import React, { useState, useCallback } from "react";
-import { Brain, CheckSquare, Timer, Music, Pause } from "lucide-react";
+import {
+  Brain,
+  CheckSquare,
+  Timer,
+  Music,
+  Pause,
+  Calendar as CalendarIcon,
+} from "lucide-react";
+import { Routes, Route, Link } from "react-router-dom";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { QuoteGenerator } from "./components/QuoteGenerator";
 import { AIAssistant } from "./components/AIAssistant";
@@ -8,6 +16,7 @@ import { TodoList } from "./components/TodoList";
 import { PomodoroTimer } from "./components/PomodoroTimer";
 import { PomodoroProvider } from "./contexts/PomodoroContext";
 import { useMusic } from "./contexts/MusicContext";
+import CalendarPage from "./components/CalendarPage";
 
 function App() {
   const [todos, setTodos] = useLocalStorage("ai-todo-app-todos", []);
@@ -101,7 +110,7 @@ function App() {
                 </div>
               </div>
 
-              {/* Right side: Stats + Music Controls */}
+              {/* Right side: Stats + Music Controls + Calendar */}
               <div className="flex items-center gap-6 text-sm text-gray-600">
                 {/* Stats */}
                 <div className="flex items-center gap-1">
@@ -141,98 +150,120 @@ function App() {
                     ))}
                   </select>
                 </div>
+
+                {/* 📅 Calendar Link */}
+                <Link
+                  to="/calendar"
+                  className="p-2 rounded-full hover:bg-gray-200 transition"
+                  title="Open Calendar"
+                >
+                  <CalendarIcon className="w-6 h-6 text-blue-500" />
+                </Link>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <QuoteGenerator />
-              <AIAssistant todos={todos} />
-            </div>
-
-            {/* Middle Column - Todo List */}
-            <div className="lg:col-span-1">
-              <TodoList
-                todos={todos}
-                onAddTodo={addTodo}
-                onToggleTodo={toggleTodo}
-                onDeleteTodo={deleteTodo}
-                onEditTodo={editTodo}
-                onStartPomodoro={startPomodoroWithTask}
-              />
-            </div>
-
-            {/* Right Column - Pomodoro Timer + Analytics */}
-            <div>
-              <PomodoroTimer
-                currentTaskId={currentTaskId}
-                onStartWithTask={startPomodoroWithTask}
-              />
-
-              {/* Task Analytics */}
-              <div className="mt-6 bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 shadow-lg border border-green-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Today's Progress
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
-                      {todos.filter((t) => t.completed).length}
-                    </div>
-                    <div className="text-sm text-gray-600">Completed</div>
+        {/* Routes */}
+        <Routes>
+          {/* Home Page (Dashboard) */}
+          <Route
+            path="/"
+            element={
+              <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Left Column */}
+                  <div className="space-y-6">
+                    <QuoteGenerator />
+                    <AIAssistant todos={todos} />
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {
-                        todos.filter(
-                          (t) => !t.completed && t.priority === "high"
-                        ).length
-                      }
+
+                  {/* Middle Column - Todo List */}
+                  <div className="lg:col-span-1">
+                    <TodoList
+                      todos={todos}
+                      onAddTodo={addTodo}
+                      onToggleTodo={toggleTodo}
+                      onDeleteTodo={deleteTodo}
+                      onEditTodo={editTodo}
+                      onStartPomodoro={startPomodoroWithTask}
+                    />
+                  </div>
+
+                  {/* Right Column - Pomodoro Timer + Analytics */}
+                  <div>
+                    <PomodoroTimer
+                      currentTaskId={currentTaskId}
+                      onStartWithTask={startPomodoroWithTask}
+                    />
+
+                    {/* Task Analytics */}
+                    <div className="mt-6 bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 shadow-lg border border-green-200">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                        Today's Progress
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">
+                            {todos.filter((t) => t.completed).length}
+                          </div>
+                          <div className="text-sm text-gray-600">Completed</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {
+                              todos.filter(
+                                (t) => !t.completed && t.priority === "high"
+                              ).length
+                            }
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            High Priority
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-green-200">
+                        <div className="text-sm text-gray-600 mb-1">
+                          Completion Rate
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-green-200 rounded-full h-2">
+                            <div
+                              className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                              style={{
+                                width: `${
+                                  todos.length > 0
+                                    ? (todos.filter((t) => t.completed).length /
+                                        todos.length) *
+                                      100
+                                    : 0
+                                }%`,
+                              }}
+                            />
+                          </div>
+                          <span className="text-sm font-medium text-green-600">
+                            {todos.length > 0
+                              ? Math.round(
+                                  (todos.filter((t) => t.completed).length /
+                                    todos.length) *
+                                    100
+                                )
+                              : 0}
+                            %
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">High Priority</div>
                   </div>
                 </div>
+              </main>
+            }
+          />
 
-                <div className="mt-4 pt-4 border-t border-green-200">
-                  <div className="text-sm text-gray-600 mb-1">
-                    Completion Rate
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-green-200 rounded-full h-2">
-                      <div
-                        className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${
-                            todos.length > 0
-                              ? (todos.filter((t) => t.completed).length /
-                                  todos.length) *
-                                100
-                              : 0
-                          }%`,
-                        }}
-                      />
-                    </div>
-                    <span className="text-sm font-medium text-green-600">
-                      {todos.length > 0
-                        ? Math.round(
-                            (todos.filter((t) => t.completed).length /
-                              todos.length) *
-                              100
-                          )
-                        : 0}
-                      %
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+          {/* Calendar Page */}
+          <Route path="/calendar" element={<CalendarPage todos={todos} />} />
+        </Routes>
       </div>
     </PomodoroProvider>
   );
