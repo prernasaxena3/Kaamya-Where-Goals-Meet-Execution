@@ -1,15 +1,20 @@
+// src/App.jsx
 import React, { useState, useCallback } from "react";
-import { Brain, CheckSquare, Timer } from "lucide-react";
+import { Brain, CheckSquare, Timer, Music, Pause } from "lucide-react";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { QuoteGenerator } from "./components/QuoteGenerator";
 import { AIAssistant } from "./components/AIAssistant";
 import { TodoList } from "./components/TodoList";
 import { PomodoroTimer } from "./components/PomodoroTimer";
-import { PomodoroProvider } from "./contexts/PomodoroContext"; // ✅ NEW CONTEXT
+import { PomodoroProvider } from "./contexts/PomodoroContext";
+import { useMusic } from "./contexts/MusicContext";
 
 function App() {
   const [todos, setTodos] = useLocalStorage("ai-todo-app-todos", []);
   const [currentTaskId, setCurrentTaskId] = useState();
+
+  const { isPlaying, togglePlay, currentSound, setSound, soundOptions } =
+    useMusic();
 
   const addTodo = useCallback(
     (todoData) => {
@@ -63,8 +68,6 @@ function App() {
     setCurrentTaskId(taskId);
   }, []);
 
-  const [showCalendar, setShowCalendar] = useState(false);
-
   const currentTask = currentTaskId
     ? todos.find((todo) => todo.id === currentTaskId)
     : undefined;
@@ -72,10 +75,10 @@ function App() {
   return (
     <PomodoroProvider
       settings={{
-        workDuration: 25, // in minutes
+        workDuration: 25,
         shortBreakDuration: 5,
         longBreakDuration: 15,
-        longBreakInterval: 4, // every 4 sessions, take long break
+        longBreakInterval: 4,
       }}
     >
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
@@ -83,6 +86,7 @@ function App() {
         <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
+              {/* Left Branding */}
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                   <Brain className="w-6 h-6 text-white" />
@@ -96,7 +100,10 @@ function App() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
+
+              {/* Right side: Stats + Music Controls */}
+              <div className="flex items-center gap-6 text-sm text-gray-600">
+                {/* Stats */}
                 <div className="flex items-center gap-1">
                   <CheckSquare className="w-4 h-4" />
                   <span>{todos.filter((t) => !t.completed).length} active</span>
@@ -109,6 +116,32 @@ function App() {
                       : "Ready to focus"}
                   </span>
                 </div>
+
+                {/* 🎵 Music Controls */}
+                {/* 🎵 Music Controls */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={togglePlay}
+                    className="p-2 rounded-full hover:bg-gray-200 transition"
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-6 h-6 text-green-500" />
+                    ) : (
+                      <Music className="w-6 h-6 text-purple-500" />
+                    )}
+                  </button>
+                  <select
+                    value={currentSound}
+                    onChange={(e) => setSound(e.target.value)}
+                    className="text-sm border rounded-md px-2 py-1"
+                  >
+                    {Object.keys(soundOptions).map((key) => (
+                      <option key={key} value={key}>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -117,7 +150,7 @@ function App() {
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Quote & AI Assistant */}
+            {/* Left Column */}
             <div className="space-y-6">
               <QuoteGenerator />
               <AIAssistant todos={todos} />
@@ -135,7 +168,7 @@ function App() {
               />
             </div>
 
-            {/* Right Column - Pomodoro Timer */}
+            {/* Right Column - Pomodoro Timer + Analytics */}
             <div>
               <PomodoroTimer
                 currentTaskId={currentTaskId}
